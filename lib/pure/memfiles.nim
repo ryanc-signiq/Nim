@@ -229,9 +229,14 @@ proc open*(filename: string, mode: FileMode = fmRead,
         # XXX: Hmm, this could be unsafe
         # Why is mmap taking int anyway?
         result.size = int(stat.st_size)
+        if result.size == 0:
+          fail(osLastError(), "file stat returned 0 for mapped size")
       else:
         fail(osLastError(), "error getting file size")
 
+    if result.size == 0:
+      fail(osLastError(), "mapped size cannot be 0")
+       
     result.mem = mmap(
       nil,
       result.size,
